@@ -13,6 +13,9 @@ class Track {
   int _minRoadEdgeWidth;
   int _minRoadWidth;
   int _maxRoadWidth;
+  Vec _startPosition;
+
+  Vec get startPosition => _startPosition;
 
   bool _bendingLeft = false;
   bool _bendingRight = false;
@@ -68,10 +71,11 @@ class Track {
 
   void initialize() {
     _minRoadEdgeWidth = 2;
-    _minRoadWidth = 5;
+    _minRoadWidth = 12;
     _maxRoadWidth = width - _minRoadEdgeWidth * 2;
-    _roadWidth = _maxRoadWidth - _minRoadWidth;
-    _roadOffset = 1 + (width - _roadWidth - _minRoadEdgeWidth) ~/ 2;
+    _roadWidth = _maxRoadWidth;
+    _roadOffset = _minRoadEdgeWidth;
+    _startPosition = Vec(rightEdge - 2, height - 5);
 
     var roadSection = generateRoadSection();
 
@@ -84,7 +88,7 @@ class Track {
   }
 
   void narrowRoad() {
-    if (_roadWidth > _minRoadWidth + 2) {
+    if (_roadWidth > _minRoadWidth) {
       _roadWidth -= 2;
       if (roomRight && randomBool) {
         rollRoadRight();
@@ -97,7 +101,7 @@ class Track {
   }
 
   void widenRoad() {
-    if (_roadWidth < _maxRoadWidth - 2) {
+    if (_roadWidth < _maxRoadWidth) {
       _roadWidth += 2;
       if (roomLeft && randomBool) {
         rollRoadLeft();
@@ -137,7 +141,7 @@ class Track {
   bool get countdownDone => _counter <= 0;
 
   void setCountdown([int nrOfTurns]) {
-    _counter = nrOfTurns ?? randomInt(3, 8);
+    _counter = nrOfTurns ?? randomInt(4, 9);
   }
 
   void countdown() {
@@ -217,8 +221,15 @@ class Track {
     return p.x < 0 || p.x > width - 1 || p.y < 0 || p.y > height - 1;
   }
 
-  bool isBlocked(int x, int y) {
-    return ((outOfBounds(Vec(x, y))) || _road[y][x] == '#');
+  bool isBlocked(Vec p) {
+    if (outOfBounds(p)) {
+      return true;
+    }
+    return (_road[p.y][p.x] == '#');
+  }
+
+  String tileAt(Vec p) {
+    return _road[p.y][p.x];
   }
 
   void render(Terminal terminal, int xPos, int yPos,

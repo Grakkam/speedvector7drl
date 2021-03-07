@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:malison/malison.dart';
 import 'package:malison/malison_web.dart';
 import 'package:piecemeal/piecemeal.dart';
@@ -12,7 +10,7 @@ class MainGameScreen extends Screen<String> {
 
   MainGameScreen(this.engine);
 
-  Car get car => engine.car;
+  Player get player => engine.player;
   Track get track => engine.track;
 
   bool _displayHint = false;
@@ -79,7 +77,7 @@ class MainGameScreen extends Screen<String> {
         break;
 
       case 'confirm':
-        car.updateSpeed(cursor);
+        player.updateSpeed(cursor);
         confirmInput();
         break;
 
@@ -113,14 +111,7 @@ class MainGameScreen extends Screen<String> {
   @override
   void update() {
     if (inputConfirmed) {
-      track.update();
-      var speed = math.min(math.max(car.speed.y.abs(), engine.roadLowSpeed),
-          engine.roadHighSpeed);
-      for (var i = 0; i < speed; i++) {
-        track.rollDown();
-        car.rollDown();
-      }
-      car.move();
+      engine.update();
       resetInput();
     }
   }
@@ -131,11 +122,37 @@ class MainGameScreen extends Screen<String> {
 
     engine.track
         .render(terminal, 25, 2, showGrid: _displayGrid, debugMode: _debug);
+    renderScore(terminal);
 
     if (_debug) {
-      car.renderDebugInfo(terminal);
+      player.renderDebugInfo(terminal);
     }
-    car.renderProjectedMoves(terminal, cursor, showHint: _displayHint);
-    car.render(terminal);
+
+    if (engine.npcs.isNotEmpty) {
+      for (var npc in engine.npcs) {
+        if (_debug) {
+          npc.renderDebugInfo(terminal);
+        }
+        if (npc.isWithinBounds) {
+          npc.render(terminal);
+        }
+      }
+    }
+
+    player.renderProjectedMoves(terminal, cursor, showHint: _displayHint);
+    if (player.isWithinBounds) {
+      player.render(terminal);
+    }
+  }
+
+  void renderScore(Terminal terminal) {
+    var x = engine.trackScreenPosition.x + track.width + 3;
+    var y = 3;
+
+    terminal.writeAt(x, y, 'Hi-score: ${engine.highscore}');
+
+    y += 2;
+
+    terminal.writeAt(x, y, 'Score: ${engine.score}');
   }
 }

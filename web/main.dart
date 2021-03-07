@@ -52,10 +52,9 @@ void main() {
   _ui.keyPress.bind('debug', KeyCode.d);
 
   var engine =
-      Engine(_ui, Track(trackWidth, trackHeight), trackPosition, Car());
+      Engine(_ui, Track(trackWidth, trackHeight), trackPosition, Player());
 
-  engine.car.park(trackWidth - 8, trackHeight - 6);
-  engine.car.updateSpeed(Vec(0, -3));
+  engine.startNewGame();
 
   _ui.push(MainGameScreen(engine));
 
