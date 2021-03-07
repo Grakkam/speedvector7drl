@@ -9,8 +9,8 @@ class Engine {
   final Car _car;
   final Track _track;
   final Vec _trackPosition;
-  final roadHighSpeed = 5;
-  final roadLowSpeed = 3;
+  final roadHighSpeed = 6;
+  final roadLowSpeed = 4;
 
   Engine(this.ui, this._track, this._trackPosition, this._car) {
     car.bind(this);

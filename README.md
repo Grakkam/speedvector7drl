@@ -15,3 +15,4 @@ Developed with the following libraries by Bob Nystrom:
 * |↑|↓|→|←| move cursor
 * |enter| confirm move
 * |space| advance turn with default move
+* |d| toggle debug info on/off

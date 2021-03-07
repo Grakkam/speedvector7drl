@@ -1,8 +1,10 @@
 import 'package:malison/malison.dart';
 import 'package:piecemeal/piecemeal.dart';
+import 'package:speedvector7drl/src/bresenham.dart';
 
 import 'package:speedvector7drl/src/colorscheme.dart';
 import 'package:speedvector7drl/src/engine.dart';
+import 'package:speedvector7drl/src/track.dart';
 
 class Car {
   Engine _engine;
@@ -19,6 +21,7 @@ class Car {
   }
 
   Engine get engine => _engine;
+  Track get track => engine.track;
 
   Car() {
     _char = CharCode.fullBlock;
@@ -76,6 +79,16 @@ class Car {
     return p + speed;
   }
 
+  bool obstructed(Vec origin, Vec destination) {
+    for (var point in bresenham(origin, destination)) {
+      if (track.isBlocked(point.x, point.y)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   void render(Terminal terminal) {
     terminal.drawChar(screenPos.x, screenPos.y, char, color);
   }
@@ -108,11 +121,23 @@ class Car {
         char = CharCode.middleDot;
       }
       var mPos = nextC(origin ?? pos) + m;
-      if (engine.track.isBlocked(mPos.x, mPos.y)) {
+      // if (engine.track.isBlocked(mPos.x, mPos.y)) {
+      //   fgColor = ColorScheme.vProjectionWarning;
+      // }
+      if (obstructed((origin ?? pos), mPos)) {
         fgColor = ColorScheme.vProjectionWarning;
       }
       mPos = offset(mPos);
       terminal.drawChar(mPos.x, mPos.y, char, fgColor);
+    }
+  }
+
+  void renderDebugInfo(Terminal terminal) {
+    var line = bresenham(pos, nextC());
+    for (var point in line) {
+      point = offset(point);
+      terminal.drawChar(
+          point.x, point.y, CharCode.space, Color.white, Color.darkAqua);
     }
   }
 }

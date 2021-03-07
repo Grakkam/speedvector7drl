@@ -5,6 +5,7 @@ import 'package:malison/malison_web.dart';
 import 'package:piecemeal/piecemeal.dart';
 import 'package:speedvector7drl/src/car.dart';
 import 'package:speedvector7drl/src/engine.dart';
+import 'package:speedvector7drl/src/track.dart';
 
 class MainGameScreen extends Screen<String> {
   final Engine engine;
@@ -12,9 +13,11 @@ class MainGameScreen extends Screen<String> {
   MainGameScreen(this.engine);
 
   Car get car => engine.car;
+  Track get track => engine.track;
 
   bool _displayHint = false;
   bool _displayGrid = false;
+  bool _debug = false;
 
   Vec cursor = Vec(0, 0);
   List<Vec> mSpots = List.of([
@@ -93,6 +96,10 @@ class MainGameScreen extends Screen<String> {
         _displayGrid = !_displayGrid;
         break;
 
+      case 'debug':
+        _debug = !_debug;
+        break;
+
       default:
         return false;
     }
@@ -106,10 +113,11 @@ class MainGameScreen extends Screen<String> {
   @override
   void update() {
     if (inputConfirmed) {
+      track.update();
       var speed = math.min(math.max(car.speed.y.abs(), engine.roadLowSpeed),
           engine.roadHighSpeed);
       for (var i = 0; i < speed; i++) {
-        engine.track.rollDown();
+        track.rollDown();
         car.rollDown();
       }
       car.move();
@@ -121,8 +129,12 @@ class MainGameScreen extends Screen<String> {
   void render(Terminal terminal) {
     terminal.clear();
 
-    engine.track.render(terminal, 25, 2, showGrid: _displayGrid);
+    engine.track
+        .render(terminal, 25, 2, showGrid: _displayGrid, debugMode: _debug);
 
+    if (_debug) {
+      car.renderDebugInfo(terminal);
+    }
     car.renderProjectedMoves(terminal, cursor, showHint: _displayHint);
     car.render(terminal);
   }

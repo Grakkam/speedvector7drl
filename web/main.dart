@@ -49,6 +49,7 @@ void main() {
   _ui.keyPress.bind('period', KeyCode.period);
   _ui.keyPress.bind('comma', KeyCode.comma);
   _ui.keyPress.bind('space', KeyCode.space);
+  _ui.keyPress.bind('debug', KeyCode.d);
 
   var engine =
       Engine(_ui, Track(trackWidth, trackHeight), trackPosition, Car());
