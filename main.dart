@@ -5,9 +5,8 @@ import 'dart:math' as math;
 import 'package:malison/malison.dart';
 import 'package:malison/malison_web.dart';
 import 'package:piecemeal/piecemeal.dart';
-import 'package:speedvector7drl/src/car.dart';
 
-import 'package:speedvector7drl/src/engine.dart';
+import 'package:speedvector7drl/src/game.dart';
 import 'package:speedvector7drl/src/maingamescreen.dart';
 import 'package:speedvector7drl/src/track.dart';
 
@@ -16,7 +15,7 @@ const int screenHeight = 40;
 const int trackWidth = 32;
 const int trackHeight = 32;
 
-const Vec trackPosition = Vec(25, 2);
+const Vec trackPanelPosition = Vec(25, 2);
 
 void main() {
   _addFont('8x8', 8);
@@ -40,10 +39,20 @@ void main() {
 
   _ui = UserInterface<String>(_font.terminal);
 
-  _ui.keyPress.bind('n', KeyCode.up);
-  _ui.keyPress.bind('s', KeyCode.down);
-  _ui.keyPress.bind('e', KeyCode.right);
-  _ui.keyPress.bind('w', KeyCode.left);
+  _ui.keyPress.bind('up', KeyCode.up);
+  _ui.keyPress.bind('down', KeyCode.down);
+  _ui.keyPress.bind('right', KeyCode.right);
+  _ui.keyPress.bind('left', KeyCode.left);
+
+  _ui.keyPress.bind('sw', KeyCode.numpad1);
+  _ui.keyPress.bind('s', KeyCode.numpad2);
+  _ui.keyPress.bind('se', KeyCode.numpad3);
+  _ui.keyPress.bind('w', KeyCode.numpad4);
+  _ui.keyPress.bind('none', KeyCode.numpad5);
+  _ui.keyPress.bind('e', KeyCode.numpad6);
+  _ui.keyPress.bind('nw', KeyCode.numpad7);
+  _ui.keyPress.bind('n', KeyCode.numpad8);
+  _ui.keyPress.bind('ne', KeyCode.numpad9);
 
   _ui.keyPress.bind('confirm', KeyCode.enter);
   _ui.keyPress.bind('period', KeyCode.period);
@@ -51,12 +60,8 @@ void main() {
   _ui.keyPress.bind('space', KeyCode.space);
   _ui.keyPress.bind('debug', KeyCode.d);
 
-  var engine =
-      Engine(_ui, Track(trackWidth, trackHeight), trackPosition, Player());
-
-  engine.startNewGame();
-
-  _ui.push(MainGameScreen(engine));
+  _ui.push(
+      MainGameScreen(Game(Track(trackWidth, trackHeight), trackPanelPosition)));
 
   _ui.handlingInput = true;
   // _ui.running = true;
@@ -107,7 +112,7 @@ void _addFont(String name, int charWidth, [int charHeight]) {
     html.window.localStorage['font'] = name;
   });
 
-  html.querySelector('.button-bar').children.add(button);
+  // html.querySelector('.button-bar').children.add(button);
 } // End of _addFont()
 
 void _fullscreen() {
