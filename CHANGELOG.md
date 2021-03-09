@@ -1,3 +1,16 @@
+## 0.5.0
+
+- Major refactor and re-write of a lot of stuff.
+- Added new font with car icon.
+- Added support for NumPad controls for quicker play.
+- Added basic collision detection between cars.
+- Improved NPC AI.
+- Lots of tweaks.
+
+## 0.4.0
+
+- Deployed to GitHub Pages! You can now try the game for yourself at https://grakkam.github.io/speedvector7drl/
+
 ## 0.3.0
 
 - Minor refactors to prepare for expansion.

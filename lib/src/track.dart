@@ -71,7 +71,7 @@ class Track {
 
   void initialize() {
     _minRoadEdgeWidth = 2;
-    _minRoadWidth = 12;
+    _minRoadWidth = 14;
     _maxRoadWidth = width - _minRoadEdgeWidth * 2;
     _roadWidth = _maxRoadWidth;
     _roadOffset = _minRoadEdgeWidth;
@@ -82,9 +82,12 @@ class Track {
     _road = List.filled(height, roadSection, growable: true);
   }
 
-  void rollDown() {
-    _road.insert(0, generateRoadSection());
-    _road.removeLast();
+  void rollDown([int amount = 1]) {
+    for (var i = 0; i < amount; i++) {
+      update();
+      _road.insert(0, generateRoadSection());
+      _road.removeLast();
+    }
   }
 
   void narrowRoad() {
@@ -141,7 +144,7 @@ class Track {
   bool get countdownDone => _counter <= 0;
 
   void setCountdown([int nrOfTurns]) {
-    _counter = nrOfTurns ?? randomInt(4, 9);
+    _counter = nrOfTurns ?? randomInt(4, 12);
   }
 
   void countdown() {
@@ -157,8 +160,10 @@ class Track {
     _widening = false;
   }
 
-  void update() {
-    countdown();
+  void update([int numberOfRolldowns = 1]) {
+    for (var i = 0; i < numberOfRolldowns; i++) {
+      countdown();
+    }
     if (countdownDone) {
       resetRoadChanges();
 
@@ -202,7 +207,6 @@ class Track {
 
   String generateRoadSection() {
     var roadSection = '';
-
     var char;
     for (var x = 0; x < width; x++) {
       if (x < leftEdge || x > rightEdge) {
