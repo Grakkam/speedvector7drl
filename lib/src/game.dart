@@ -23,10 +23,11 @@ class Game {
   Game(this.track, this.trackPanelPosition) {
     player = PlayerCar(this, null);
     addEntity(player);
-    var npc = NPC(this, null);
-    var npc2 = NPC(this, null);
-    addEntity(npc);
-    addEntity(npc2);
+    addEntity(NPC(this, null));
+    addEntity(NPC(this, null));
+    addEntity(NPC(this, null));
+    addEntity(NPC(this, null));
+    addEntity(NPC(this, null));
     startNewGame();
     hudPanelPosition = trackPanelPosition + Vec(track.width + 2, 0);
   }
@@ -44,6 +45,9 @@ class Game {
     currentTurn = 0;
     track.initialize();
     player.reset(track.startPosition);
+    for (var i = 0; i < npcs.length; i++) {
+      npcs[i].reset(track.startPosition + Vec(-6, -5) + Vec(-i, -i));
+    }
     npcs[0].reset(track.startPosition + Vec(-6, -5));
     npcs[1].reset(track.startPosition + Vec(-8, -3));
   }

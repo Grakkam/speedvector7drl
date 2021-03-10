@@ -3,10 +3,11 @@ import 'dart:math' as math;
 import 'package:malison/malison.dart';
 import 'package:piecemeal/piecemeal.dart';
 import 'package:speedvector7drl/src/colorscheme.dart';
+import 'package:speedvector7drl/src/road.dart';
 
 class Track {
-  final int _width;
-  final int _height;
+  final int _width = 32;
+  final _height = 32;
   List<String> _road;
   int _roadWidth;
   int _roadOffset;
@@ -65,7 +66,7 @@ class Track {
 
   double get randomDouble => _random.nextDouble();
 
-  Track(this._width, this._height) {
+  Track(int foo, int bar) {
     initialize();
   }
 
@@ -77,14 +78,16 @@ class Track {
     _roadOffset = _minRoadEdgeWidth;
     _startPosition = Vec(rightEdge - 2, height - 5);
 
-    var roadSection = generateRoadSection();
+    var roadSection = Road.wideStraight.first;
 
-    _road = List.filled(height, roadSection, growable: true);
+    _road = List.filled(32, roadSection, growable: true);
+
+    initializeNewRoad();
   }
 
   void rollDown([int amount = 1]) {
     for (var i = 0; i < amount; i++) {
-      update();
+      // update();
       _road.insert(0, generateRoadSection());
       _road.removeLast();
     }
@@ -206,19 +209,22 @@ class Track {
   }
 
   String generateRoadSection() {
-    var roadSection = '';
-    var char;
-    for (var x = 0; x < width; x++) {
-      if (x < leftEdge || x > rightEdge) {
-        char = '#';
-      } else {
-        char = '.';
-      }
+    rollRoad();
+    return _currentSection.last;
 
-      roadSection += char;
-    }
+    // var roadSection = '';
+    // var char;
+    // for (var x = 0; x < width; x++) {
+    //   if (x < leftEdge || x > rightEdge) {
+    //     char = '#';
+    //   } else {
+    //     char = '.';
+    //   }
 
-    return roadSection;
+    //   roadSection += char;
+    // }
+
+    // return roadSection;
   }
 
   bool outOfBounds(Vec p) {
@@ -272,5 +278,30 @@ class Track {
     terminal.writeAt(2, 14, 'rightEdge: $rightEdge');
     terminal.writeAt(2, 15, 'roomOnLeft: $roomOnLeft');
     terminal.writeAt(2, 16, 'roomOnRight: $roomOnRight');
+  }
+
+  final List<String> _currentSection = List.empty(growable: true);
+  final List<String> _nextSection = List.empty(growable: true);
+
+  List<String> generateRoad() {
+    var roadSections = [];
+    roadSections.addAll(Road.wideSections);
+    var randomNumber = randomInt(0, roadSections.length);
+    return roadSections[randomNumber];
+  }
+
+  void initializeNewRoad() {
+    _currentSection.clear();
+    _nextSection.clear();
+    _currentSection.addAll(Road.wideStraight);
+    _nextSection.addAll(generateRoad());
+  }
+
+  void rollRoad([int amount = 1]) {
+    if (_nextSection.isEmpty) {
+      _nextSection.addAll(generateRoad());
+    }
+    _currentSection.insert(0, _nextSection.removeLast());
+    _currentSection.removeLast();
   }
 }

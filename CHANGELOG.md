@@ -1,3 +1,7 @@
+## 0.5.1
+
+- Started work on a more interesting way to generate road sections.
+
 ## 0.5.0
 
 - Major refactor and re-write of a lot of stuff.
