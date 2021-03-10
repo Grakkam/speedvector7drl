@@ -7,7 +7,7 @@ import 'package:malison/malison_web.dart';
 import 'package:piecemeal/piecemeal.dart';
 
 import 'package:speedvector7drl/src/game.dart';
-import 'package:speedvector7drl/src/maingamescreen.dart';
+import 'package:speedvector7drl/src/mainmenuscreen.dart';
 import 'package:speedvector7drl/src/track.dart';
 
 const int screenWidth = 80;
@@ -54,16 +54,17 @@ void main() {
   _ui.keyPress.bind('n', KeyCode.numpad8);
   _ui.keyPress.bind('ne', KeyCode.numpad9);
 
+  _ui.keyPress.bind('exit', KeyCode.escape);
   _ui.keyPress.bind('confirm', KeyCode.enter);
   _ui.keyPress.bind('period', KeyCode.period);
   _ui.keyPress.bind('comma', KeyCode.comma);
   _ui.keyPress.bind('space', KeyCode.space);
   _ui.keyPress.bind('debug', KeyCode.d);
 
-  _ui.push(MainGameScreen(Game(Track(), trackPanelPosition)));
+  _ui.push(MainMenuScreen(Game(Track(), trackPanelPosition)));
 
   _ui.handlingInput = true;
-  // _ui.running = true;
+  _ui.running = true;
 } // End of main()
 
 final _fonts = <TerminalFont>[];

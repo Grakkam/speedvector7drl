@@ -1,5 +1,5 @@
 # Speed Vector
-## a fast-paced, turn-based racing game!
+## a fast-paced, turn-based arcade racing roguelike!
 
 My submission for the 2021 7DRL challenge. (7drl.com)
 

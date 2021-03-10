@@ -1,35 +1,47 @@
 import 'dart:math' as math;
 
+import 'package:malison/malison.dart';
 import 'package:piecemeal/piecemeal.dart';
 import 'package:speedvector7drl/src/entity.dart';
+import 'package:speedvector7drl/src/messagelog.dart';
 import 'package:speedvector7drl/src/track.dart';
 
 class Game {
+  final String version = '0.6.0';
+
+  MessageLog _messageLog;
   PlayerCar player;
   final _entities = <Entity>[];
   final Track track;
   Vec trackPanelPosition;
   Vec hudPanelPosition;
+  Vec instructionsPanelPosition;
   int score = 0;
   int highscore = 0;
   int roadMinSpeed = 4;
   int roadMaxSpeed = 6;
   int currentTurn = 0;
 
+  MessageLog get messageLog => _messageLog;
+
   List<Entity> get entities => _entities;
   List<Car> get cars => _entities.whereType<Car>().toList();
   List<NPC> get npcs => _entities.whereType<NPC>().toList();
 
   Game(this.track, this.trackPanelPosition) {
+    _messageLog = MessageLog();
     player = PlayerCar(this, null);
     addEntity(player);
-    addEntity(NPC(this, null));
-    addEntity(NPC(this, null));
-    addEntity(NPC(this, null));
-    addEntity(NPC(this, null));
-    addEntity(NPC(this, null));
+    for (var i = 0; i < 5; i++) {
+      addEntity(NPC(this, null, name: 'NPC$i'));
+    }
     startNewGame();
     hudPanelPosition = trackPanelPosition + Vec(track.width + 2, 0);
+    instructionsPanelPosition = Vec(1, 2);
+  }
+
+  void log(String text, {Color fgColor = Color.gray, bool stack = true}) {
+    messageLog.addMessage(text: text, fg: fgColor, stack: stack);
   }
 
   void advanceTurnCounter() {

@@ -11,28 +11,37 @@ class Entity {
   String name;
   int charCode;
   Vec position;
+  Vec lastPosition;
   Color fgColor;
   Color bgColor;
   bool blocksMovement;
   // TODO: Render order
 
   Entity(this._game, this.position, this.name, this.charCode, this.fgColor,
-      this.bgColor, this.blocksMovement);
+      this.bgColor, this.blocksMovement) {
+    lastPosition = Vec(0, 0);
+  }
 
   Game get game => _game;
   Track get track => game.track;
   Vec get screenCoordinates => position + game.trackPanelPosition;
 
+  void update() {}
+
   void rollDown([int amount = 1]) {
     for (var i = 0; i < amount; i++) {
       position += Direction.s;
+      lastPosition += Direction.s;
     }
   }
 
-  void update() {}
-
   @override
   String toString() => name;
+
+  void updatePosition(Vec pos) {
+    lastPosition = Vec(position.x, position.y);
+    position = Vec(pos.x, pos.y);
+  }
 
   void renderToDisplay(Terminal terminal, Vec pos, int charCode,
       {Color fgColor = Color.white, Color bgColor = Color.black}) {
@@ -47,6 +56,8 @@ class Entity {
 }
 
 class Car extends Entity {
+  int maxHp;
+  int hp;
   Color projectionColor = Color.gray;
   Color cursorColor = Color.white;
   Vec speedVector;
@@ -64,6 +75,7 @@ class Car extends Entity {
 
   bool get isAlive => !crashed;
   int get speed => speedVector.y.abs();
+  Direction get directionVector => speedVector.nearestDirection;
   bool get movingLeft => speedVector.x < 0;
   bool get movingRight => speedVector.x > 0;
 
@@ -71,17 +83,72 @@ class Car extends Entity {
   Vec get rightSensor => nextC() + Vec(6, -3);
   Vec get leftSensor => nextC() + Vec(-6, -3);
 
+  @override
+  void update() {
+    if (hp <= 0) {
+      crash();
+    }
+  }
+
   void changeSpeed(Direction direction) {
     speedVector += direction;
   }
 
   void move() {
     var destination = position + speedVector;
-    if (pathIsObstructed(position, destination) ||
-        game.entityAtPosition(destination) != null) {
+
+    if (pathIsObstructed(position, destination)) {
       crash();
+    } else if (game.entityAtPosition(destination) != null) {
+      checkCollision(game.entityAtPosition(destination));
     }
-    position = destination;
+
+    // if (pathIsObstructed(position, destination) ||
+    //     game.entityAtPosition(destination) != null) {
+    //       if (game.entityAtPosition(destination) != null) {
+    //         checkCollision(game.entityAtPosition(destination));
+    //       }
+    //   // crash();
+    // }
+    updatePosition(position + speedVector);
+  }
+
+  void drift(Direction direction) {
+    updatePosition(position + direction);
+  }
+
+  void shunt(Car other) {
+    other.drift(directionVector);
+    other.hp -= 1;
+  }
+
+  bool checkCollision(Entity other) {
+    if (other == null) {
+      return false;
+    }
+
+    if (other is Car) {
+      if (speed >= other.speed) {
+        shunt(other);
+        return true;
+      } else {
+        drift(other.directionVector);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  List<Entity> getEntitiesAtSamePosition() {
+    var entities = <Entity>[];
+    for (var entity in game.entities) {
+      if (entity != this && entity.position == position) {
+        entities.add(entity);
+      }
+    }
+
+    return entities;
   }
 
   void crash() {
@@ -90,7 +157,9 @@ class Car extends Entity {
   }
 
   void reset(Vec pos) {
+    hp = maxHp;
     position = pos;
+    lastPosition = Vec(pos.x, pos.y);
     crashed = false;
     speedVector = startingSpeedVector;
   }
@@ -144,18 +213,19 @@ class Car extends Entity {
   }
 
   void renderDebugInfo(Terminal terminal) {
-    // var line = bresenham(position, nextC());
-    // for (var point in line) {
-    //   renderToDisplay(terminal, point, CharCode.space, bgColor: Color.orange);
-    // }
-    var points = [];
-    points.add(forwardSensor);
-    points.add(nextC(nextC()));
-    points.add(leftSensor);
-    points.add(rightSensor);
-    for (var point in points) {
-      renderToDisplay(terminal, point, CharCode.plus, fgColor: fgColor);
+    var line = bresenham(lastPosition, position);
+    for (var point in line) {
+      renderToDisplay(terminal, point, CharCode.asterisk,
+          fgColor: Color.orange);
     }
+    // var points = [];
+    // points.add(forwardSensor);
+    // points.add(nextC(nextC()));
+    // points.add(leftSensor);
+    // points.add(rightSensor);
+    // for (var point in points) {
+    //   renderToDisplay(terminal, point, CharCode.plus, fgColor: fgColor);
+    // }
   }
 
   @override
@@ -173,13 +243,21 @@ class Car extends Entity {
 class PlayerCar extends Car {
   PlayerCar(Game game, Vec position,
       {Color fgColor = Color.purple, Color bgColor = Color.black})
-      : super(game, position, 'Player', fgColor, bgColor);
+      : super(game, position, 'Player', fgColor, bgColor) {
+    maxHp = 5;
+    hp = maxHp;
+  }
 }
 
 class NPC extends Car {
   NPC(Game game, Vec position,
-      {Color fgColor = Color.darkYellow, Color bgColor = Color.black})
-      : super(game, position, 'NPC', fgColor, bgColor);
+      {String name = 'NPC',
+      Color fgColor = Color.darkYellow,
+      Color bgColor = Color.black})
+      : super(game, position, name, fgColor, bgColor) {
+    maxHp = 2;
+    hp = maxHp;
+  }
 
   final math.Random random = math.Random();
 
@@ -212,6 +290,7 @@ class NPC extends Car {
 
   @override
   void update() {
+    super.update();
     if (isAlive) {
       tryToStayOnTheRoad();
     }

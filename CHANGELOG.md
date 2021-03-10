@@ -1,3 +1,10 @@
+## 0.6.0
+
+- Improved collision detection. Cars will now bounce off of each other and two cars cannot occupy the same space.
+- Added hit points to allow player to take more than one hit.
+- Added title screen and instructions screen.
+- Preparations started for including a message log.
+
 ## 0.5.5
 
 - Continued improvement of track generation.

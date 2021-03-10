@@ -143,7 +143,12 @@ class MainGameScreen extends Screen<String> {
 
       player.changeSpeed(Direction(cursor.x, cursor.y));
 
-      for (var car in game.cars) {
+      var cars = game.cars;
+      // Sort cars in order of speed
+      cars.sort((a, b) => a.speed.compareTo(b.speed));
+
+      // Process cars acording to speed, in descending order
+      for (var car in cars.reversed) {
         car.update();
         if (car.isAlive) {
           car.move();
@@ -157,6 +162,22 @@ class MainGameScreen extends Screen<String> {
           }
         }
       }
+
+      var collision;
+      do {
+        collision = false;
+        for (var car in game.cars) {
+          var entitiesAtSamePosition = car.getEntitiesAtSamePosition();
+          if (entitiesAtSamePosition.isNotEmpty) {
+            for (var entity in entitiesAtSamePosition) {
+              if (car.checkCollision(entity)) {
+                collision = true;
+              }
+            }
+          }
+        }
+      } while (collision);
+
       for (var entity in game.entities) {
         entity.rollDown(speed);
       }
@@ -178,7 +199,11 @@ class MainGameScreen extends Screen<String> {
 
     track.render(terminal, game.trackPanelPosition.x, game.trackPanelPosition.y,
         showGrid: displayGrid, debugMode: debug);
-    renderScore(terminal);
+    renderHud(terminal);
+    renderInstructions(terminal);
+
+    player.renderProjectedMoves(terminal,
+        cursorPos: cursor, showHint: displayHint);
 
     for (var entity in game.entities) {
       if (debug) {
@@ -187,18 +212,27 @@ class MainGameScreen extends Screen<String> {
         }
       }
 
-      if (entity is PlayerCar) {
-        entity.renderProjectedMoves(terminal,
-            cursorPos: cursor, showHint: displayHint);
-      }
+      // if (entity is PlayerCar) {
+      //   entity.renderProjectedMoves(terminal,
+      //       cursorPos: cursor, showHint: displayHint);
+      // }
       entity.render(terminal);
     }
   }
 
-  void renderScore(Terminal terminal) {
+  void renderHud(Terminal terminal) {
     var x = game.hudPanelPosition.x;
     var y = game.hudPanelPosition.y;
     terminal.writeAt(x, y, 'Highest score: ${game.highscore}');
     terminal.writeAt(x, y + 2, 'Score: ${game.score}');
+    terminal.writeAt(x, y + 5, 'Speed: ${player.speed}');
+    terminal.writeAt(x, y + 6, 'Hitpoints: ${player.hp} / ${player.maxHp}');
+  }
+
+  void renderInstructions(Terminal terminal) {
+    var x = game.instructionsPanelPosition.x;
+    var y = game.instructionsPanelPosition.y;
+    terminal.writeAt(x, y, '[,] Show hint', Color.darkGray);
+    terminal.writeAt(x, y + 1, '[.] Show grid', Color.darkGray);
   }
 }
