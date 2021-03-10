@@ -149,7 +149,11 @@ class MainGameScreen extends Screen<String> {
           car.move();
         } else if (car is NPC) {
           if (random.nextBool()) {
-            car.reset(Vec(track.width ~/ 3 + random.nextInt(3), -3));
+            var spawnLocation =
+                Vec(track.width ~/ 3 + track.randomInt(0, 6), 0);
+            if (!track.isBlocked(spawnLocation)) {
+              car.reset(spawnLocation);
+            }
           }
         }
       }

@@ -1,3 +1,10 @@
+## 0.5.5
+
+- Continued improvement of track generation.
+- Added more different road sections.
+- Added random starting positions.
+- Improved how NPCs are spawned at the top of the screen. They now only spawn on open road.
+
 ## 0.5.1
 
 - Started work on a more interesting way to generate road sections.

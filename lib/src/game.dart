@@ -43,13 +43,19 @@ class Game {
   void startNewGame() {
     score = 0;
     currentTurn = 0;
+
     track.initialize();
-    player.reset(track.startPosition);
-    for (var i = 0; i < npcs.length; i++) {
-      npcs[i].reset(track.startPosition + Vec(-6, -5) + Vec(-i, -i));
+
+    for (var car in cars) {
+      var pos = track.startingPositions
+          .removeAt(track.randomInt(0, track.startingPositions.length));
+      car.reset(pos);
     }
-    npcs[0].reset(track.startPosition + Vec(-6, -5));
-    npcs[1].reset(track.startPosition + Vec(-8, -3));
+
+    // player.reset(track.startPosition);
+    // for (var i = 1; i < npcs.length + 1; i++) {
+    //   npcs[i - 1].reset(track.startPosition + Vec(-i * 2, -i));
+    // }
   }
 
   void end() {
