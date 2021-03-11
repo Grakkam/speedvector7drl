@@ -3,8 +3,10 @@ import 'dart:math' as math;
 import 'package:malison/malison.dart';
 import 'package:malison/malison_web.dart';
 import 'package:piecemeal/piecemeal.dart';
+import 'package:speedvector7drl/src/colorscheme.dart';
 import 'package:speedvector7drl/src/entity.dart';
 import 'package:speedvector7drl/src/game.dart';
+import 'package:speedvector7drl/src/linearfunctions.dart';
 import 'package:speedvector7drl/src/track.dart';
 
 class MainGameScreen extends Screen<String> {
@@ -12,18 +14,6 @@ class MainGameScreen extends Screen<String> {
   final math.Random random = math.Random();
 
   MainGameScreen(this.game);
-
-  int currentTurn = 0;
-  bool timeToUpdate = false;
-
-  void endTurn() {
-    timeToUpdate = true;
-  }
-
-  void startNewTurn() {
-    game.advanceTurnCounter();
-    timeToUpdate = false;
-  }
 
   Track get track => game.track;
   PlayerCar get player => game.player;
@@ -59,39 +49,39 @@ class MainGameScreen extends Screen<String> {
     switch (input) {
       case 'nw':
         setCursor(Direction.nw);
-        endTurn();
+        game.endTurn();
         break;
       case 'n':
         setCursor(Direction.n);
-        endTurn();
+        game.endTurn();
         break;
       case 'ne':
         setCursor(Direction.ne);
-        endTurn();
+        game.endTurn();
         break;
       case 'w':
         setCursor(Direction.w);
-        endTurn();
+        game.endTurn();
         break;
       case 'none':
         setCursor(Direction.none);
-        endTurn();
+        game.endTurn();
         break;
       case 'e':
         setCursor(Direction.e);
-        endTurn();
+        game.endTurn();
         break;
       case 'sw':
         setCursor(Direction.sw);
-        endTurn();
+        game.endTurn();
         break;
       case 's':
         setCursor(Direction.s);
-        endTurn();
+        game.endTurn();
         break;
       case 'se':
         setCursor(Direction.se);
-        endTurn();
+        game.endTurn();
         break;
 
       case 'up':
@@ -108,11 +98,11 @@ class MainGameScreen extends Screen<String> {
         break;
 
       case 'confirm':
-        endTurn();
+        game.endTurn();
         break;
       case 'space':
         setCursor(Direction.none);
-        endTurn();
+        game.endTurn();
         break;
       case 'comma':
         displayHint = !displayHint;
@@ -137,58 +127,111 @@ class MainGameScreen extends Screen<String> {
 
   @override
   void update() {
-    if (timeToUpdate) {
+    if (game.gameIsRunning) {
+      var cars = game.cars;
       var speed = math.min(
           math.max(player.speed, game.roadMinSpeed), game.roadMaxSpeed);
 
-      player.changeSpeed(Direction(cursor.x, cursor.y));
+      if (game.turnOver) {
+        player.changeSpeed(Direction(cursor.x, cursor.y));
 
-      var cars = game.cars;
-      // Sort cars in order of speed
-      cars.sort((a, b) => a.speed.compareTo(b.speed));
+        // Sort cars in order of speed
+        cars.sort((a, b) => a.speed.compareTo(b.speed));
 
-      // Process cars acording to speed, in descending order
-      for (var car in cars.reversed) {
-        car.update();
-        if (car.isAlive) {
-          car.move();
-        } else if (car is NPC) {
-          if (random.nextBool()) {
-            var spawnLocation =
-                Vec(track.width ~/ 3 + track.randomInt(0, 6), 0);
-            if (!track.isBlocked(spawnLocation)) {
-              car.reset(spawnLocation);
-            }
-          }
+        // Process cars acording to speed, in descending order
+        for (var car in cars.reversed) {
+          car.update();
         }
-      }
 
-      var collision;
-      do {
-        collision = false;
-        for (var car in game.cars) {
-          var entitiesAtSamePosition = car.getEntitiesAtSamePosition();
-          if (entitiesAtSamePosition.isNotEmpty) {
-            for (var entity in entitiesAtSamePosition) {
-              if (car.checkCollision(entity)) {
-                collision = true;
+        var opponentNotSpawnedThisTurn = true;
+        for (var car in cars.reversed) {
+          if (car.isAlive) {
+            car.move();
+          } else if (car is NPC && car.isOffScreen()) {
+            if (random.nextBool()) {
+              var spawnLocation =
+                  Vec(track.width ~/ 3 + track.randomInt(0, 18), 0);
+              if (!track.isBlocked(spawnLocation) &&
+                  opponentNotSpawnedThisTurn) {
+                car.reset(spawnLocation);
+                opponentNotSpawnedThisTurn = false;
               }
             }
           }
         }
-      } while (collision);
 
-      for (var entity in game.entities) {
-        entity.rollDown(speed);
-      }
-      track.rollDown(speed);
-      if (player.isAlive) {
-        game.updateScore(game.currentTurn + player.speed);
-        startNewTurn();
-      } else {
-        cursor = Direction.none;
-        timeToUpdate = false;
-        game.end();
+        if (debug) {
+          for (var car in cars.reversed) {
+            var otherCars = game.cars;
+            otherCars.remove(car);
+
+            for (var other in otherCars) {
+              var potentialCollision = car.pathIntersects(other);
+              if (potentialCollision != null) {
+                game.log(
+                    'Path of ${car.name} intersects with that of ${other.name}!',
+                    fgColor: car.fgColor);
+              }
+            }
+          }
+        }
+
+        for (var car in cars) {
+          if (car.isAlive && track.withinBounds(car.position)) {
+            var otherEntities = [];
+            otherEntities.addAll(game.entities);
+            otherEntities.remove(car);
+            for (var other in otherEntities) {
+              var line = Line(car.trail.start, car.trail.end);
+
+              if (onLine(line, other.position)) {
+                car.checkCollision(other);
+              }
+            }
+          }
+        }
+
+        var collision;
+        do {
+          collision = false;
+          for (var car in game.cars) {
+            if (car.isAlive) {
+              var entitiesAtSamePosition = car.getEntitiesAtSamePosition();
+              if (entitiesAtSamePosition.isNotEmpty) {
+                for (var entity in entitiesAtSamePosition) {
+                  if (car.checkCollision(entity)) {
+                    collision = true;
+                  }
+                }
+              }
+            }
+          }
+        } while (collision);
+
+        for (var entity in game.entities) {
+          entity.rollDown(speed);
+        }
+        track.rollDown(speed);
+        if (player.isAlive) {
+          game.updateScore(game.currentTurn + player.speed);
+          game.startNewTurn();
+        } else {
+          cursor = Direction.none;
+          game.turnOver = false;
+          game.log(
+              'You have crashed. Your car is a wreck. A burning wreck. Seriously, you\'re on fire. And not in a good way...',
+              fgColor: ColorScheme.danger);
+          game.end();
+        }
+
+        if (player.positionIsOffScreen && !player.destinationIsOffScreen) {
+          game.log(
+              'Uh oh! You need to go faster if you want to stay in the race!',
+              fgColor: ColorScheme.warning);
+        }
+        if (!player.positionIsOffScreen && player.destinationIsOffScreen) {
+          game.log('Whoa, slow down!', fgColor: ColorScheme.warning);
+        }
       }
     }
   }
@@ -212,12 +255,11 @@ class MainGameScreen extends Screen<String> {
         }
       }
 
-      // if (entity is PlayerCar) {
-      //   entity.renderProjectedMoves(terminal,
-      //       cursorPos: cursor, showHint: displayHint);
-      // }
       entity.render(terminal);
     }
+
+    game.messageLog.render(terminal, game.logPanelPosition.x,
+        game.logPanelPosition.y, game.logPanelSize.x, game.logPanelSize.y);
   }
 
   void renderHud(Terminal terminal) {

@@ -3,6 +3,7 @@
 
 My submission for the 2021 7DRL challenge. (7drl.com)
 
+Current version: 0.7.0 (Thursday, 11 march 2021)
 
 Try it here:
 https://grakkam.github.io/speedvector7drl/

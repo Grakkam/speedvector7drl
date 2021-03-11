@@ -1,3 +1,10 @@
+## 0.7.0
+
+- Complete overhaul of the collision detection system!
+- Added message log.
+- Tweaked the NPC AI to make races a bit more interesting.
+- Miscellaneous tweaks here and there.
+
 ## 0.6.0
 
 - Improved collision detection. Cars will now bounce off of each other and two cars cannot occupy the same space.

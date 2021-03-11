@@ -6,8 +6,8 @@ import 'package:speedvector7drl/src/colorscheme.dart';
 import 'package:speedvector7drl/src/road.dart';
 
 class Track {
-  final int _width = 32;
-  final int _height = 32;
+  final int _width;
+  final int _height;
   List<String> _road;
   // Vec _startPosition;
   List<Vec> _startingPositions = [];
@@ -27,7 +27,7 @@ class Track {
 
   double get randomDouble => _random.nextDouble();
 
-  Track() {
+  Track(this._width, this._height) {
     initialize();
   }
 
@@ -35,12 +35,12 @@ class Track {
     // _startPosition = Vec(23, 28);
 
     _startingPositions = [
-      Vec(14, 20),
-      Vec(16, 20),
-      Vec(12, 22),
-      Vec(18, 22),
-      Vec(10, 24),
-      Vec(20, 24),
+      Vec(14, height - 8),
+      Vec(16, height - 8),
+      Vec(12, height - 6),
+      Vec(18, height - 6),
+      Vec(10, height - 4),
+      Vec(20, height - 4),
     ];
 
     var roadSection = Road.wideStraight.first;
@@ -69,10 +69,15 @@ class Track {
     return p.x < 0 || p.x > width - 1 || p.y < 0 || p.y > height - 1;
   }
 
+  bool withinBounds(Vec p) {
+    return p.x >= 0 && p.x < width && p.y >= 0 && p.y < height;
+  }
+
   bool isBlocked(Vec p) {
     if (outOfBounds(p)) {
-      return true;
+      return false;
     }
+
     return (_road[p.y][p.x] == '#');
   }
 

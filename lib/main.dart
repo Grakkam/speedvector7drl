@@ -10,10 +10,10 @@ import 'package:speedvector7drl/src/game.dart';
 import 'package:speedvector7drl/src/mainmenuscreen.dart';
 import 'package:speedvector7drl/src/track.dart';
 
-const int screenWidth = 80;
-const int screenHeight = 40;
+const int screenWidth = 60;
+const int screenHeight = 35;
 const int trackWidth = 32;
-const int trackHeight = 32;
+const int trackHeight = 24;
 
 const Vec trackPanelPosition = Vec(25, 2);
 
@@ -61,7 +61,8 @@ void main() {
   _ui.keyPress.bind('space', KeyCode.space);
   _ui.keyPress.bind('debug', KeyCode.d);
 
-  _ui.push(MainMenuScreen(Game(Track(), trackPanelPosition)));
+  _ui.push(
+      MainMenuScreen(Game(Track(trackWidth, trackHeight), trackPanelPosition)));
 
   _ui.handlingInput = true;
   _ui.running = true;
@@ -138,8 +139,8 @@ RetroTerminal _makeTerminal(
   int charWidth,
   int charHeight,
 ) {
-  var width = (html.document.body.clientWidth - 20) ~/ charWidth;
-  var height = (html.document.body.clientHeight - 30) ~/ charHeight;
+  var width = (html.document.body.clientWidth - 50) ~/ charWidth;
+  var height = (html.document.body.clientHeight - 50) ~/ charHeight;
 
   width = math.max(width, screenWidth);
   height = math.max(height, screenHeight);
