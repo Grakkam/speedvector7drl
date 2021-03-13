@@ -115,6 +115,7 @@ class Track {
   bool get roadIsWide => _roadStyle == RoadStyle.wide;
   bool get roadIsNarrowCenter => _roadStyle == RoadStyle.narrowCenter;
   bool get roadIsNarrowRight => _roadStyle == RoadStyle.narrowRight;
+  bool get roadIsNarrowLeft => _roadStyle == RoadStyle.narrowLeft;
 
   void setRoadNarrowCenter() {
     _roadStyle = RoadStyle.narrowCenter;
@@ -122,6 +123,10 @@ class Track {
 
   void setRoadNarrowRight() {
     _roadStyle = RoadStyle.narrowRight;
+  }
+
+  void setRoadNarrowLeft() {
+    _roadStyle = RoadStyle.narrowLeft;
   }
 
   void setRoadWide() {
@@ -138,6 +143,9 @@ class Track {
       if (randomBool) {
         setRoadNarrowRight();
         return Road.narrowCenterToNarrowRight;
+      } else if (randomBool) {
+        setRoadNarrowLeft();
+        return Road.narrowCenterToNarrowLeft;
       } else {
         setRoadWide();
         return Road.narrowCenterToWide;
@@ -146,6 +154,17 @@ class Track {
       if (randomBool) {
         setRoadNarrowCenter();
         return Road.narrowRightToNarrowCenter;
+      } else if (randomBool) {
+        setRoadNarrowLeft();
+        return Road.narrowRightToNarrowLeft;
+      }
+    } else if (roadIsNarrowLeft && randomBool) {
+      if (randomBool) {
+        setRoadNarrowCenter();
+        return Road.narrowLeftToNarrowCenter;
+      } else if (randomBool) {
+        setRoadNarrowRight();
+        return Road.narrowLeftToNarrowRight;
       }
     }
 
@@ -158,6 +177,9 @@ class Track {
         break;
       case RoadStyle.narrowRight:
         roadSections.addAll(Road.narrowRightSections);
+        break;
+      case RoadStyle.narrowLeft:
+        roadSections.addAll(Road.narrowLeftSections);
         break;
       default:
         roadSections.addAll(Road.wideSections);

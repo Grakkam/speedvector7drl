@@ -1,3 +1,7 @@
+## 0.9.0
+
+- Tweaked a lot of the existing road sections and added more.
+
 ## 0.8.5
 
 - Added info on the "Speed Vector Unofficial Soundtrack" playlist on Spotify.
