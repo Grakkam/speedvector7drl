@@ -45,7 +45,7 @@ class Track {
 
     var roadSection = Road.wideStraight.first;
 
-    _road = List.filled(32, roadSection, growable: true);
+    _road = List.filled(height, roadSection, growable: true);
 
     initializeNewRoad();
   }

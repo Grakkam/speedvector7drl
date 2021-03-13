@@ -1,25 +1,41 @@
+import 'dart:html' as html;
 import 'dart:math' as math;
 
 import 'package:malison/malison.dart';
-import 'package:malison/malison_web.dart';
 import 'package:piecemeal/piecemeal.dart';
+import 'package:speedvector7drl/main.dart';
 import 'package:speedvector7drl/src/colorscheme.dart';
 import 'package:speedvector7drl/src/entity.dart';
 import 'package:speedvector7drl/src/game.dart';
 import 'package:speedvector7drl/src/linearfunctions.dart';
 import 'package:speedvector7drl/src/track.dart';
+import 'package:speedvector7drl/src/ui.dart';
 
-class MainGameScreen extends Screen<String> {
-  final Game game;
+class MainGameScreen extends ScreenWithMouse<String> {
+  final Game _game;
   final math.Random random = math.Random();
 
-  MainGameScreen(this.game);
+  List<String> options = ['Show hint', 'Show grid', 'Show instructions'];
+  List<Button> buttons = [];
+
+  MainGameScreen(this._game) {
+    var buttonX = game.buttonPanelPosition.x;
+    var buttonY = game.buttonPanelPosition.y;
+    for (var text in options) {
+      buttons
+          .add(Button(Vec(buttonX, buttonY), text, Color.darkGold, Color.gold));
+      buttonY += 2;
+    }
+  }
+
+  Game get game => _game;
 
   Track get track => game.track;
   PlayerCar get player => game.player;
 
   bool displayHint = false;
   bool displayGrid = false;
+  bool displayInstructions = true;
   bool debug = false;
 
   Vec cursor = Vec(0, 0);
@@ -41,6 +57,22 @@ class MainGameScreen extends Screen<String> {
     }
     if (cursor.y > 1) {
       cursor = Vec(cursor.x, 1);
+    }
+  }
+
+  void toggleSetting(int n) {
+    switch (n) {
+      case 0:
+        displayHint = !displayHint;
+        break;
+      case 1:
+        displayGrid = !displayGrid;
+        break;
+      case 2:
+        displayInstructions = !displayInstructions;
+        break;
+      default:
+        return;
     }
   }
 
@@ -96,20 +128,18 @@ class MainGameScreen extends Screen<String> {
       case 'left':
         moveCursor(Direction.w);
         break;
-
       case 'confirm':
         game.endTurn();
         break;
-      case 'space':
-        setCursor(Direction.none);
-        game.endTurn();
-        break;
-      case 'comma':
-        displayHint = !displayHint;
-        break;
 
+      case 'comma':
+        toggleSetting(0);
+        break;
       case 'period':
-        displayGrid = !displayGrid;
+        toggleSetting(1);
+        break;
+      case 'space':
+        toggleSetting(2);
         break;
 
       case 'debug':
@@ -122,6 +152,54 @@ class MainGameScreen extends Screen<String> {
 
     dirty();
     ui.refresh();
+    return true;
+  }
+
+  @override
+  bool mouseUp(html.MouseEvent mouseEvent) {
+    var p = mousePosition16 - trackPanelPosition;
+    if (track.withinBounds(p)) {
+      if (game.entityAtPosition(p) == null) {
+        game.endTurn();
+        dirty();
+        return true;
+      }
+      for (var dVec in player.standardDirectionVectors) {
+        if (player.nextC() + dVec == p) {
+          setCursor(dVec);
+          game.endTurn();
+          dirty();
+          return true;
+        }
+      }
+    } else {
+      for (var i = 0; i < buttons.length; i++) {
+        if (buttons[i].hoveredOver(mousePosition16)) {
+          toggleSetting(i);
+          dirty();
+          return true;
+        }
+      }
+    }
+    dirty();
+    return true;
+  }
+
+  @override
+  bool mouseMove(html.MouseEvent mouseEvent) {
+    var p = mousePosition16 - trackPanelPosition;
+    if (track.withinBounds(p)) {
+      var mouseDirVec = p - player.nextC();
+      cursor = mouseDirVec.nearestDirection;
+
+      for (var dVec in player.standardDirectionVectors) {
+        if (player.nextC() + dVec == p) {
+          setCursor(dVec);
+          continue;
+        }
+      }
+    }
+    dirty();
     return true;
   }
 
@@ -240,10 +318,14 @@ class MainGameScreen extends Screen<String> {
   void render(Terminal terminal) {
     terminal.clear();
 
+    buttons[0].render(terminal, displayHint);
+    buttons[1].render(terminal, displayGrid);
+    buttons[2].render(terminal, displayInstructions);
+
     track.render(terminal, game.trackPanelPosition.x, game.trackPanelPosition.y,
         showGrid: displayGrid, debugMode: debug);
     renderHud(terminal);
-    renderInstructions(terminal);
+    // renderInstructions(terminal);
 
     player.renderProjectedMoves(terminal,
         cursorPos: cursor, showHint: displayHint);
@@ -260,6 +342,49 @@ class MainGameScreen extends Screen<String> {
 
     game.messageLog.render(terminal, game.logPanelPosition.x,
         game.logPanelPosition.y, game.logPanelSize.x, game.logPanelSize.y);
+
+    renderEntitiesUnderMouse(terminal);
+    if (displayInstructions) {
+      renderInstructions(terminal);
+    }
+    renderTooltip(terminal);
+  }
+
+  void renderTooltip(Terminal terminal) {
+    for (var i = 0; i < buttons.length; i++) {
+      if (buttons[i].hoveredOver(mousePosition16)) {
+        var text = [];
+        switch (i) {
+          case 0:
+            text = [
+              'Display where your next center',
+              'movement option will be.',
+              'Shortcut: [,]'
+            ];
+            break;
+          case 1:
+            text = [
+              'Display the grid to help',
+              'visualize possible movements.',
+              'Shortcut: [.]'
+            ];
+            break;
+          case 2:
+            text = [
+              'Display on-screen',
+              'instructions below.',
+              'Shortcut: [space]'
+            ];
+            break;
+          default:
+          // text = '';
+        }
+        var p = mousePosition16 + Vec(2, -1);
+        for (var i = 0; i < text.length; i++) {
+          terminal.writeAt(p.x, p.y + i, text[i]);
+        }
+      }
+    }
   }
 
   void renderHud(Terminal terminal) {
@@ -271,10 +396,36 @@ class MainGameScreen extends Screen<String> {
     terminal.writeAt(x, y + 6, 'Hitpoints: ${player.hp} / ${player.maxHp}');
   }
 
+  List<String> instructions = [
+    '[↑↓→←] Move cursor to',
+    '  pick direction',
+    '[enter] Confirm choice',
+    '[numpad] Pick direction',
+    '  AND confirm',
+  ];
+
   void renderInstructions(Terminal terminal) {
     var x = game.instructionsPanelPosition.x;
     var y = game.instructionsPanelPosition.y;
-    terminal.writeAt(x, y, '[,] Show hint', Color.darkGray);
-    terminal.writeAt(x, y + 1, '[.] Show grid', Color.darkGray);
+    for (var i = 0; i < instructions.length; i++) {
+      terminal.writeAt(x, y + i * 2, instructions[i], Color.gray);
+    }
+  }
+
+  void renderEntitiesUnderMouse(Terminal terminal) {
+    var results = [];
+    for (var entity in game.entities) {
+      if (mousePosition16 == entity.position + trackPanelPosition) {
+        results.add(entity);
+      }
+    }
+    if (track.withinBounds(mousePosition16 - trackPanelPosition)) {
+      var p = mousePosition16 + Vec(1, -2);
+      if (results.isNotEmpty) {
+        terminal.writeAt(p.x, p.y, results.toString());
+        p += Direction.s;
+        terminal.drawChar(p.x, p.y, CharCode.slash);
+      }
+    }
   }
 }

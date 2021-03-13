@@ -1,3 +1,12 @@
+## 0.8.0
+
+- Added full mouse support!
+- Added on-screen instructions on the main game screen.
+- Revised "How to Play" screen.
+- Added "About" screen.
+- Disabled "double-click to switch to fullscreen" because I don't have time to sort out the conflicts with the general mouse support.
+- Hard coded font-size at 16x16 pixels. Not ideal, but it works well enough for now.
+
 ## 0.7.0
 
 - Complete overhaul of the collision detection system!

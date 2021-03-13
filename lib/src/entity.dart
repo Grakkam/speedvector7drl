@@ -76,6 +76,7 @@ class Car extends Entity {
   }
 
   bool get isAlive => !wrecked;
+  int get topSpeed => game.roadMaxSpeed + 1;
   int get speed => speedVector.abs().y;
   Direction get directionVector => speedVector.nearestDirection;
   bool get movingLeft => speedVector.x < 0;
@@ -91,13 +92,16 @@ class Car extends Entity {
 
   @override
   void update() {
-    if (hp <= 0) {
+    if (hp <= 0 && isAlive) {
       crash();
     }
   }
 
   void changeSpeed(Direction direction) {
     speedVector += direction;
+    if (speed > topSpeed) {
+      changeSpeed(Direction.s);
+    }
   }
 
   bool isFrontOf(Entity other) {
@@ -212,6 +216,7 @@ class Car extends Entity {
   }
 
   void crash() {
+    hp = 0;
     wrecked = true;
     speedVector = Vec(0, 0);
   }
@@ -265,7 +270,7 @@ class Car extends Entity {
           fgColor = cursorColor;
           charCode = CharCode.plus;
           if (showHint) {
-            var p = nextC(point);
+            var p = nextC(point) + dVec;
             renderToDisplay(terminal, p, CharCode.plus,
                 fgColor: (track.isBlocked(p)
                     ? ColorScheme.danger
@@ -341,8 +346,10 @@ class Car extends Entity {
 
 class PlayerCar extends Car {
   PlayerCar(Game game, Vec position,
-      {Color fgColor = Color.purple, Color bgColor = Color.black})
-      : super(game, position, 'Player', fgColor, bgColor) {
+      {Color fgColor = Color.purple,
+      Color bgColor = Color.black,
+      String name = 'Player'})
+      : super(game, position, name, fgColor, bgColor) {
     maxHp = 10;
     hp = maxHp;
   }

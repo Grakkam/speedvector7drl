@@ -3,9 +3,9 @@
 
 My submission for the 2021 7DRL challenge. (7drl.com)
 
-Current version: 0.7.0 (Thursday, 11 march 2021)
+Current version: 0.8.0 (Saturday, 13 march 2021)
 
-Try it here:
+Play it here:
 https://grakkam.github.io/speedvector7drl/
 
 
@@ -16,10 +16,4 @@ Developed with the following libraries by Bob Nystrom:
 
 ## Controls
 
-* |.| toggle grid on/off
-* |,| toggle hint projection on/off
-* |↑|↓|→|←| move cursor
-* |NumPad 1-9| move cursor AND confirm move
-* |enter| confirm move
-* |space| advance turn with default move
-* |d| toggle debug info on/off
+Can be played with only keyboard, only mouse, or a combination of both.

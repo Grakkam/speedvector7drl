@@ -8,17 +8,21 @@ import 'package:speedvector7drl/src/messagelog.dart';
 import 'package:speedvector7drl/src/track.dart';
 
 class Game {
-  final String version = '0.7.0';
+  final String version = '0.8.0';
 
   MessageLog _messageLog;
   PlayerCar player;
   final _entities = <Entity>[];
   final Track track;
-  Vec trackPanelPosition;
+  final Vec trackPanelPosition;
   Vec hudPanelPosition;
   Vec instructionsPanelPosition;
+  Vec buttonPanelPosition;
   Vec logPanelPosition;
   Vec logPanelSize;
+  final int charWidth = 16;
+  final int charHeight = 16;
+
   int score = 0;
   int highscore = 0;
   int roadMinSpeed = 4;
@@ -35,22 +39,30 @@ class Game {
 
   Game(this.track, this.trackPanelPosition) {
     _messageLog = MessageLog();
-    player = PlayerCar(this, null);
+    player = PlayerCar(this, null, name: 'Purple Player');
     addEntity(player);
     var npcColors = [
-      Color.aqua,
+      Color.blue,
       Color.yellow,
       Color.red,
       Color.orange,
-      Color.green
+      Color.green,
+    ];
+    var npcNames = [
+      'Blue Velvet',
+      'Yellow Fever',
+      'Red Hot',
+      'Orange Juice',
+      'Green Envy',
     ];
     for (var i = 0; i < 5; i++) {
-      addEntity(NPC(this, null, name: 'NPC$i', fgColor: npcColors[i]));
+      addEntity(NPC(this, null, name: npcNames[i], fgColor: npcColors[i]));
     }
     startNewGame();
     hudPanelPosition = trackPanelPosition + Vec(track.width + 2, 0);
-    instructionsPanelPosition = Vec(1, 2);
-    logPanelPosition = Vec(5, trackPanelPosition.y + track.height + 1);
+    buttonPanelPosition = Vec(0, 2);
+    instructionsPanelPosition = Vec(0, buttonPanelPosition.y + 8);
+    logPanelPosition = Vec(0, trackPanelPosition.y + track.height + 1);
     logPanelSize = Vec(60, 5);
   }
 
