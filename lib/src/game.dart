@@ -4,11 +4,16 @@ import 'package:malison/malison.dart';
 import 'package:piecemeal/piecemeal.dart';
 import 'package:speedvector7drl/src/colorscheme.dart';
 import 'package:speedvector7drl/src/entity.dart';
+import 'package:speedvector7drl/src/maingamescreen.dart';
 import 'package:speedvector7drl/src/messagelog.dart';
 import 'package:speedvector7drl/src/track.dart';
+import 'package:speedvector7drl/src/ui.dart';
 
 class Game {
-  final String version = '0.9.0';
+  final String version = '1.0.0';
+  final String releaseDate = 'Saturday, 13 March 2021';
+
+  ScreenWithMouse mainGameScreen;
 
   MessageLog _messageLog;
   PlayerCar player;
@@ -25,6 +30,8 @@ class Game {
 
   int score = 0;
   int highscore = 0;
+  int longestGame = 0;
+  int deathCount = 0;
   int roadMinSpeed = 4;
   int roadMaxSpeed = 6;
   int currentTurn = 0;
@@ -38,9 +45,28 @@ class Game {
   List<NPC> get npcs => _entities.whereType<NPC>().toList();
 
   Game(this.track, this.trackPanelPosition) {
+    hudPanelPosition = trackPanelPosition + Vec(track.width + 2, 0);
+    buttonPanelPosition = Vec(0, 2);
+    instructionsPanelPosition = Vec(0, buttonPanelPosition.y + 8);
+    logPanelPosition = Vec(0, trackPanelPosition.y + track.height + 1);
+    logPanelSize = Vec(60, 5);
+
+    mainGameScreen ??= MainGameScreen(this);
+
     _messageLog = MessageLog();
+
+    messageLog.addMessage(text: 'Welcome to SPEED VECTOR', fg: Color.purple);
+    messageLog.addMessage(
+        text: ' >>> a fast-paced, turn-based, arcade racing roguelike',
+        fg: Color.gray);
+    messageLog.addMessage(
+        text: '7DRL 2021 Edition --- v.$version', fg: Color.darkGold);
+    messageLog.addMessage(
+        text: 'Release date: $releaseDate', fg: Color.darkGold);
+
     player = PlayerCar(this, null, name: 'Purple Player');
     addEntity(player);
+
     var npcColors = [
       Color.blue,
       Color.yellow,
@@ -58,12 +84,6 @@ class Game {
     for (var i = 0; i < 5; i++) {
       addEntity(NPC(this, null, name: npcNames[i], fgColor: npcColors[i]));
     }
-    startNewGame();
-    hudPanelPosition = trackPanelPosition + Vec(track.width + 2, 0);
-    buttonPanelPosition = Vec(0, 2);
-    instructionsPanelPosition = Vec(0, buttonPanelPosition.y + 8);
-    logPanelPosition = Vec(0, trackPanelPosition.y + track.height + 1);
-    logPanelSize = Vec(60, 5);
   }
 
   void log(String text, {Color fgColor = Color.gray, bool stack = true}) {
@@ -72,10 +92,6 @@ class Game {
 
   void endTurn() {
     turnOver = true;
-
-    if (gameIsRunning == false) {
-      startNewGame();
-    }
   }
 
   void startNewTurn() {
@@ -84,7 +100,7 @@ class Game {
   }
 
   void advanceTurnCounter() {
-    currentTurn += 1;
+    currentTurn++;
   }
 
   void updateScore(int amount) {
@@ -92,19 +108,18 @@ class Game {
   }
 
   void end() {
+    endTurn();
     if (score > highscore) {
       log('...but you also beat the high score, awesome!',
           fgColor: ColorScheme.success);
     }
     highscore = math.max(highscore, score);
-    endTurn();
-    log('<<< Press [ENTER] to race again! >>>', fgColor: ColorScheme.info);
+    deathCount++;
+    longestGame = math.max(longestGame, currentTurn);
     gameIsRunning = false;
   }
 
   void startNewGame() {
-    messageLog.messages.clear();
-    log('Start your engines!', fgColor: Color.orange);
     score = 0;
     currentTurn = 0;
 

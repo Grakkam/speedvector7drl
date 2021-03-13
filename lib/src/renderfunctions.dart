@@ -21,6 +21,8 @@ class UIBox {
   String _title;
   bool _clear;
 
+  Game get game => _game;
+
   UIBox(this._game, this._x, this._y, this._width, this._height,
       {String title,
       Color color = Color.white,

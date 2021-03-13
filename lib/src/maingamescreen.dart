@@ -26,6 +26,7 @@ class MainGameScreen extends ScreenWithMouse<String> {
           .add(Button(Vec(buttonX, buttonY), text, Color.darkGold, Color.gold));
       buttonY += 2;
     }
+    game.startNewGame();
   }
 
   Game get game => _game;
@@ -300,6 +301,7 @@ class MainGameScreen extends ScreenWithMouse<String> {
               'You have crashed. Your car is a wreck. A burning wreck. Seriously, you\'re on fire. And not in a good way...',
               fgColor: ColorScheme.danger);
           game.end();
+          ui.pop();
         }
 
         if (player.positionIsOffScreen && !player.destinationIsOffScreen) {
@@ -325,7 +327,6 @@ class MainGameScreen extends ScreenWithMouse<String> {
     track.render(terminal, game.trackPanelPosition.x, game.trackPanelPosition.y,
         showGrid: displayGrid, debugMode: debug);
     renderHud(terminal);
-    // renderInstructions(terminal);
 
     player.renderProjectedMoves(terminal,
         cursorPos: cursor, showHint: displayHint);
@@ -377,7 +378,7 @@ class MainGameScreen extends ScreenWithMouse<String> {
             ];
             break;
           default:
-          // text = '';
+            text = [''];
         }
         var p = mousePosition16 + Vec(2, -1);
         for (var i = 0; i < text.length; i++) {

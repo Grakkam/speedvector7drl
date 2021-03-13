@@ -64,8 +64,8 @@ void main() {
   _ui.keyPress.bind('space', KeyCode.space);
   _ui.keyPress.bind('debug', KeyCode.d);
 
-  _ui.push(
-      MainMenuScreen(Game(Track(trackWidth, trackHeight), trackPanelPosition)));
+  var game = Game(Track(trackWidth, trackHeight), trackPanelPosition);
+  _ui.push(MainMenuScreen(game));
 
   _ui.handlingInput = true;
   _ui.handlingMouseInput = true;

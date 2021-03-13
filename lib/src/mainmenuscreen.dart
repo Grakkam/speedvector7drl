@@ -4,6 +4,7 @@ import 'package:piecemeal/piecemeal.dart';
 import 'package:speedvector7drl/src/aboutscreen.dart';
 import 'package:speedvector7drl/src/game.dart';
 import 'package:speedvector7drl/src/howtoplayscreen.dart';
+import 'package:speedvector7drl/src/loghistoryscreen.dart';
 import 'package:speedvector7drl/src/maingamescreen.dart';
 import 'package:speedvector7drl/src/ui.dart';
 
@@ -13,12 +14,17 @@ class MainMenuScreen extends ScreenWithMouse<String> {
   Game get game => _game;
 
   int choice = 0;
-  List<String> options = ['New Game', 'How to Play', 'About the Game'];
+  List<String> options = [
+    'New Game',
+    'How to Play',
+    'About the Game',
+    'View Log History'
+  ];
   List<Button> buttons = [];
 
   MainMenuScreen(this._game) {
     var buttonX = 8;
-    var buttonY = 15;
+    var buttonY = 12;
     for (var text in options) {
       buttons
           .add(Button(Vec(buttonX, buttonY), text, Color.darkAqua, Color.aqua));
@@ -86,6 +92,9 @@ class MainMenuScreen extends ScreenWithMouse<String> {
       case 2:
         ui.push(AboutScreen(game, options[choice]));
         break;
+      case 3:
+        ui.push(MessageLogScreen(game, options[choice]));
+        break;
       default:
     }
 
@@ -94,17 +103,23 @@ class MainMenuScreen extends ScreenWithMouse<String> {
 
   @override
   void render(Terminal terminal) {
-    var x = 4;
-    var y = 4;
-    terminal.writeAt(x, y, 'SPEED VECTOR', Color.purple);
-    terminal.writeAt(x + 3, y += 2,
-        'a fast-paced, turn-based, arcade racing roguelike', Color.gray);
-    terminal.writeAt(
-        x, y += 3, '7DRL 2021 Edition --- v.${game.version}', Color.darkGold);
-    terminal.writeAt(x + 3, y += 2, 'by u/Grakkam', Color.gray);
-
     for (var i = 0; i < options.length; i++) {
       buttons[i].render(terminal, (choice == i));
     }
+
+    if (game.highscore > 0) {
+      var x = terminal.width ~/ 2;
+      var y = 8;
+      terminal.writeAt(x, y, 'Highest Score:');
+      terminal.writeAt(x + 3, y += 2, game.highscore.toString(), Color.purple);
+      terminal.writeAt(x, y += 2, 'Death Count:');
+      terminal.writeAt(x + 3, y += 2, game.deathCount.toString(), Color.purple);
+      terminal.writeAt(x, y += 2, 'Longest game:');
+      terminal.writeAt(
+          x + 3, y += 2, '${game.longestGame.toString()} turns', Color.purple);
+    }
+
+    game.messageLog.render(terminal, game.logPanelPosition.x,
+        game.logPanelPosition.y, game.logPanelSize.x, game.logPanelSize.y);
   }
 }

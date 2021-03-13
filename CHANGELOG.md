@@ -1,3 +1,9 @@
+## 1.0.0
+
+- Final version of the 7DRL 2021 Edition!
+- Tweaked main menu screen.
+- Added log history screen.
+
 ## 0.9.0
 
 - Tweaked a lot of the existing road sections and added more.

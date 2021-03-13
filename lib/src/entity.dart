@@ -17,7 +17,6 @@ class Entity {
   Color fgColor;
   Color bgColor;
   bool blocksMovement;
-  // TODO: Render order
 
   Entity(this._game, this.position, this.name, this.charCode, this.fgColor,
       this.bgColor, this.blocksMovement) {
@@ -292,12 +291,6 @@ class Car extends Entity {
   }
 
   void renderDebugInfo(Terminal terminal) {
-    // if (this is PlayerCar) {
-    //   for (var other in game.npcs) {
-    //     pathIntersects(other);
-    //   }
-    // }
-
     for (var i = 0; path.elementAt(i) != destination; i++) {
       if (!track.outOfBounds(path.elementAt(i))) {
         renderToDisplay(terminal, path.elementAt(i), CharCode.asterisk,
@@ -314,20 +307,6 @@ class Car extends Entity {
         }
       }
     }
-
-    // var line = bresenham(lastPosition, position);
-    // for (var point in line) {
-    //   renderToDisplay(terminal, point, CharCode.asterisk,
-    //       fgColor: Color.orange);
-    // }
-    // var points = [];
-    // points.add(forwardSensor);
-    // points.add(nextC(nextC()));
-    // points.add(leftSensor);
-    // points.add(rightSensor);
-    // for (var point in points) {
-    //   renderToDisplay(terminal, point, CharCode.plus, fgColor: fgColor);
-    // }
   }
 
   @override

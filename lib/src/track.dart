@@ -9,10 +9,8 @@ class Track {
   final int _width;
   final int _height;
   List<String> _road;
-  // Vec _startPosition;
   List<Vec> _startingPositions = [];
 
-  // Vec get startPosition => _startPosition;
   List<Vec> get startingPositions => _startingPositions;
 
   int get width => _width;
@@ -32,8 +30,6 @@ class Track {
   }
 
   void initialize() {
-    // _startPosition = Vec(23, 28);
-
     _startingPositions = [
       Vec(14, height - 8),
       Vec(16, height - 8),
