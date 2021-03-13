@@ -8,7 +8,7 @@ import 'package:speedvector7drl/src/messagelog.dart';
 import 'package:speedvector7drl/src/track.dart';
 
 class Game {
-  final String version = '0.8.0';
+  final String version = '0.8.5';
 
   MessageLog _messageLog;
   PlayerCar player;

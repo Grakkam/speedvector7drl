@@ -1,3 +1,9 @@
+## 0.8.5
+
+- Added info on the "Speed Vector Unofficial Soundtrack" playlist on Spotify.
+- Updated "About the Game" screen.
+- Revised "How to Play" screen.
+
 ## 0.8.0
 
 - Added full mouse support!
