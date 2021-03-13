@@ -9,11 +9,14 @@ import 'package:piecemeal/piecemeal.dart';
 import 'package:speedvector7drl/src/game.dart';
 import 'package:speedvector7drl/src/mainmenuscreen.dart';
 import 'package:speedvector7drl/src/track.dart';
+import 'package:speedvector7drl/src/ui.dart';
 
 const int screenWidth = 60;
 const int screenHeight = 35;
 const int trackWidth = 32;
 const int trackHeight = 24;
+const int charWidth = 16;
+const int charHeight = 16;
 
 const Vec trackPanelPosition = Vec(25, 2);
 
@@ -37,7 +40,7 @@ void main() {
     _resizeTerminal();
   });
 
-  _ui = UserInterface<String>(_font.terminal);
+  _ui = UserInterfaceWithMouse<String>(_font.terminal);
 
   _ui.keyPress.bind('up', KeyCode.up);
   _ui.keyPress.bind('down', KeyCode.down);
@@ -65,11 +68,12 @@ void main() {
       MainMenuScreen(Game(Track(trackWidth, trackHeight), trackPanelPosition)));
 
   _ui.handlingInput = true;
+  _ui.handlingMouseInput = true;
   _ui.running = true;
 } // End of main()
 
 final _fonts = <TerminalFont>[];
-UserInterface<String> _ui;
+UserInterfaceWithMouse<String> _ui;
 
 TerminalFont _font;
 
@@ -88,9 +92,9 @@ void _addFont(String name, int charWidth, [int charHeight]) {
   charHeight ??= charWidth;
 
   var canvas = html.CanvasElement();
-  canvas.onDoubleClick.listen((_) {
-    _fullscreen();
-  });
+  // canvas.onDoubleClick.listen((_) {
+  //   _fullscreen();
+  // });
 
   var terminal = _makeTerminal(canvas, charWidth, charHeight);
   _fonts.add(TerminalFont(name, canvas, terminal,
